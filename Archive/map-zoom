@@ -1,0 +1,59 @@
+// color
+var bias_domain=[-2,-1,-0.5,0,.5,1,2];
+var bias_color=d3.scaleThreshold()
+  .domain(bias_domain)
+  .range (['#4d9221', '#a1d76a', '#e6f5d0', '#f7f7f7', '#fde0ef', '#e9a3c9', '#c51b7d']);
+  // (d3.schemeGreens[7]);
+
+  var width = 960;
+  var height = 600;
+  var padding = 20;
+
+
+
+
+
+//implicit
+var implicitData= d3.map();
+
+//asynchronous tasks, load topojson maps and data
+d3.queue()
+  .defer (d3.json, "data/us-10m.json")
+  .defer (d3.csv, "data/raceprunedsample.csv", function(d){
+    implicitData.set(+d.fips, +d.implicitbias, +d.FIPSState)
+  })
+  .await (ready);
+
+
+
+
+//callback function
+function ready (error,data){
+  if (error) throw error;
+//US map definition
+  var usMap=topojson.feature(data,{
+    type: "GeometryCollection",
+    geometries: data.objects.counties.geometries
+  })
+// projection
+  var projection=d3.geoAlbersUsa()
+    // .fitExtent([[20,20],[960,580]], usMap)
+    .precision(0)
+    .scale(height * 2).translate([width / 2, height / 2]);
+
+  var path=d3.geoPath()
+    .projection(projection);
+
+//draw the map
+  d3.selectAll("svg.bias").selectAll("path")
+    .data(usMap.features)
+    .enter()
+    .append("path")
+    .attr("width",width)
+    .attr("height",height)
+    .attr("d",geoPath)
+    .attr("fill",function(d){
+      return bias_color(d.implicit=implicitData.get(d.id))
+    })
+
+}

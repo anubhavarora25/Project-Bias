@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="js/d3.v4.js"></script>
+    <script type="text/javascript" src="js/crossfilter.js"></script>
+    <script type="text/javascript" src="js/dc.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
+		<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <script src="https://unpkg.com/d3-simple-slider"></script>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="Custom.css" >
+
+    <title>Project BIAS</title>
+    <style>
+      .row{
+        margin-bottom: 50px;
+      }
+      h1 {
+        margin-top: 80px; margin-bottom:50px;
+      }
+
+      h3{
+        margin-top: 1s0px;
+      }
+      #slider-5 .handle {
+        fill: none;
+        stroke: none;
+        stroke-opacity: 0.5;
+        stroke-width: 1.25px;
+      }
+      #slider-6 .handle {
+        fill: none;
+        stroke: none;
+        stroke-opacity: 0.5;
+        stroke-width: 1.25px;
+      }
+      img {
+          max-width: 100%;
+          max-height: 100%;
+      }
+      .btn-dark{
+        background-color: #61ff00;
+        border-color: #61ff00;
+      }
+
+      body {
+            font-family: 'Lora', serif;
+        }
+
+        .nation-border,
+        .state-border,
+        .county-border {
+            fill: none;
+            stroke: #000000;
+        }
+.county-border #countyFill {
+  fill:"yellow";
+}
+        .county-border {
+            stroke-width: 0.1px;
+            pointer-events:all;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+        }
+
+        .nation-border,
+        .state-border {
+            stroke-width: 0.5px;
+            pointer-events:none;
+        }
+
+        .background {
+            fill: #f5f5f5;
+            fill-opacity: 0.5;
+        }
+
+        .tooltip {
+            top: 100px;
+            left: 100px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            /*border: 2px solid #000;*/
+            background: #333;
+            opacity: .9;
+            color: white;
+            padding: 10px;
+            min-width: 375px;
+            min-width: 36.75vmin;
+            font-size: 2.25vmin;
+            line-height: 24pt;
+            font-family: 'Lora', serif;
+            font-weight: lighter;
+            visibility: visible;
+        }
+
+        .tooltip.right::before {
+            content: '';
+            display: block;
+            width: 0;
+            height: 0;
+            position: absolute;
+            opacity: .9;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+            border-left: 8px solid #333;
+            right: -8px;
+            top: 35px;
+            /* arbitrarily set */
+        }
+
+        .tooltip.left::before {
+                    content: '';
+                    display: block;
+                    width: 0;
+                    height: 0;
+                    position: absolute;
+                    opacity: .9;
+                    border-top: 8px solid transparent;
+                    border-bottom: 8px solid transparent;
+                    left: -8px;
+                    border-right: 8px solid #333;
+                    top: 35px;
+                    /* arbitrarily set */
+                }
+                /* SVG Scaling */
+                /*body,*/
+                /*svg {*/
+                /*    height: 100%;*/
+                /*    margin: 0;*/
+                /*    width: 100%;*/
+                /*    float: left;*/
+                /*}*/
+
+          .scaling-svg-container {
+              position: relative;
+              height: 0;
+              width: 100%;
+              padding: 0
+          }
+
+          .scaling-svg {
+              position: absolute;
+              height: 99%;
+              width: 100%;
+              left: 0;
+              top: 0
+          }
+
+    </style>
+  </head>
+  <body>
+
+    <!-- intro section what is implicit bias-->
+
+       <div id="geoChoroplethChart" align="center"></div>
+    </div>
+    <div class="row" >
+      <div class="col"></div>
+      <div class="col-4">
+        <div class="main-text">
+          <h1 align="center" >Project Bias</h1>
+          <p>
+            The goal of this visualization is to let you explore racial bias, specifically preference for black/African American or white/caucasian, in the United States.
+            <br></p>
+            <div class="col"></div>
+            <div class="col-8">
+              <img src="images/bias.png">
+            </div>
+            <div class="col"></div>
+            <!-- <svg width="250" height="250">
+              <circle cx="125" cy="125" r="100" fill="#61ff00" />
+              <text x="50%" y="50%" text-anchor="middle" fill="white" font-size="30px" font-family="Arial" dy=".3em">Racial Bias</text>
+              </svg>
+              <svg id="arrow">
+                <defs>
+                  <style>
+                      path, polyline {
+                          fill: none;
+                          stroke: #231F20;
+                          vector-effect: non-scaling-stroke;
+                          stroke-width: 2;
+                     }
+                      path {
+                          stroke-dasharray: 11, 5;
+                      }
+                  </style>
+                  <marker id="pointer" markerWidth="10" markerHeight="8"
+              	refX="9.5" refY="5.1" orient="-45" markerUnits="userSpaceOnUse">
+                      <polyline points="1 1, 9 5, 1 7" />
+                  </marker>
+                </defs>
+                <path d="M16.7,178 c87.6-46.9,162.9-185.4,227-136.4C307.2,90.1,195,158.5,111,108.9C71,85.2,92.2,30.7,126,7"
+                  marker-end="url(#pointer)"/>
+              </svg> -->
+
+            <br>
+            The following visualization shows the average implicit racial bias level and how it has changed over time for all states. The Implicit Bias Score is based on the Harvard Implicit Association Test (IAT) and is said to measure the subconscious biases individuals exhibit*.<br>
+
+          Here we have visualized the average bias by state for all the tests taken between 2002 and 2018. Use the filters to get a better feel for the data. Scroll down when you are done exploring.<br>
+          <small>*Although the accuracy of the test has been questioned, it is still the most commonly used method for measuring implicit bias. </small>
+          </p>
+        </div>
+      </div>
+      <div class="col"></div>
+    </div>
+
+    <!-- interaction 1, form stereotypes-->
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-7">
+        <h3>IMPLICIT BIAS BY COUNTY</h3>
+        <h5 class="text-muted">Average Implicit Bias (IAT) Score from 2002-2018</h5>
+        <!-- <img src="implicit.png" class="img-fluid"> -->
+        <svg class="bias" width="960" height="600"></svg>
+      </div>
+      <div class="col">
+        <div class="filter">
+              <!-- <br><br><br><br><br><br><h6>Filters:</h6><br>
+                <select id="Age" class="filterOption"></select>
+                <span>year old</span>
+                <select id="Gender" class="filterOption"></select>
+                <span>people who identify as</span>
+                <select id="Sexual_Identity" class="filterOption"></select>
+                <span>with a total family income of</span>
+                <select id="Total_Family_Income" class="filterOption"></select>
+                </span>.</span> -->
+        </div>
+      </div>
+    </div>
+
+<!-- everyone is biased  -->
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-4">
+        <p>Based on your explorations, what do you think the <strong>average bias</strong> for the following groups are? Don’t cheat, just use your intuition! </p>
+      </div>
+      <div class="col">
+      </div>
+    </div>
+<!-- //sliders -->
+    <div><h5 align="center"><strong><u>Female</u>&nbsp;&nbsp;<u>Boomer</u>&nbsp;&nbsp;<u>Nevada<br><br></strong></u></h5></div>
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-1"><p style="text-align:right;"><small><br>Prefers Black</small></p></div>
+      <div class="col-3" style="text-align:center;">
+        <div id="slider-1" style="text-align:center;">
+        </div>
+        <div style="text-align:center"><button type="button" class="btn btn-dark" onclick="testCircle.style.fill='red'; testCircle.style.stroke='black';">Check Answer</button></div>
+      </div>
+      <div class="col-1"><p><small><br>Prefers White</small></p></div>
+      <div class="col"></div>
+    </div>
+    <br><br>
+<!-- //slider2 -->
+    <div><h5 align="center"><strong><u>Male</u>&nbsp;&nbsp;<u>Silent Generation</u>&nbsp;&nbsp;with a &nbsp;<u>High School Degree<br><br></strong></u></h5></div>
+    <div class="row">
+      <div class="col"></div>
+      <div class="col-1"><p style="text-align:right;"><small><br>Prefers Black</small></p></div>
+      <div class="col-3" style="text-align:center;">
+        <div id="slider-2" style="text-align:center;">
+        </div>
+        <div style="text-align:center"><button type="button" class="btn btn-dark" onclick="testCircle2.style.fill='yellow'; testCircle2.style.stroke='black';">Check Answer</button></div>
+      </div>
+      <div class="col-1"><p><small><br>Prefers White</small></p></div>
+      <div class="col"></div>
+    </div>
+    <br><br>
+<!-- //slider3 -->
+        <div><h5 align="center"><strong><u>Female</u>&nbsp;&nbsp;<u>Millennial</u>&nbsp;&nbsp;with a &nbsp;<u>Master's Degree</u> &nbsp;from&nbsp; <u>California<br><br></strong></u></h5></div>
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-1"><p style="text-align:right;"><small><br>Prefers Black</small></p></div>
+          <div class="col-3" style="text-align:center;">
+            <div id="slider-3" style="text-align:center;">
+            </div>
+            <div style="text-align:center"><button type="button" class="btn btn-dark" onclick="testCircle3.style.fill='green'; testCircle3.style.stroke='black';">Check Answer</button></div>
+          </div>
+          <div class="col-1"><p><small><br>Prefers White</small></p></div>
+          <div class="col"></div>
+        </div>
+        <br><br>
+
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-4">
+            <p>How did you do? Good? Bad? Regardless of the result, did you find the task easy? That's because the human brain by nature likes to categorize and put things in buckets.
+              <br> In fact, the whole point was not to show you how good you were at guessing the average bias for a given group. It was to show you that <strong>all </strong>humans categorize. Another name for this inherent categorization is bias. And therefore<br> </p><br>
+              <h2 style="color:#61ff00;" align="center"> <strong> Bias is <u>human</u></strong>.</h2>
+          </div>
+          <div class="col">
+          </div>
+        </div>
+
+<!-- OWN BIAS -->
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-4">
+            <p>You are not a bad person because you are biased. We are all biased. It is however important to see, recognize, and acknowledge our biases and how they may impact our decisions daily. <br>Now let's see about your own bias, how biased do <strong>you</strong> think you are? </p>
+          </div>
+          <div class="col">
+          </div>
+        </div>
+<!-- //slider4 -->
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-1"><p style="text-align:right;"><small><br>Prefer Black</small></p></div>
+          <div class="col-3" style="text-align:center;">
+            <div id="slider-4" style="text-align:center;">
+            </div>
+          </div>
+          <div class="col-1"><p><small><br>Prefer White</small></p></div>
+          <div class="col"></div>
+        </div>
+
+<!-- Filters -->
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-5">
+            <div class="filter" align="center">
+                    <p>Now let's see what the bias for the <strong>average</strong> you looks like!<br><br>
+                    <span>I am a</span>
+                    <select id="Age" class="filterOption"></select>
+                    <span>year old</span>
+                    <select id="Race" class="filterOption"></select>
+                    <select id="Gender" class="filterOption"></select>
+                    <span>from</span>
+                    <select id="County" class="filterOption"></select>
+                    <span>with a</span>
+                    <select id="Education" class="filterOption"></select>
+                    </span>.</span>
+            </div>
+          </div>
+          <div class="col">
+          </div>
+        </div>
+        <div style="text-align:center"><button type="button" class="btn btn-dark" onclick="seeResult()">See Result</button></div>
+<!-- //slider5 -->
+        <div class="row" style="margin-bottom: 0px; margin-top:50px">
+          <div class="col"></div>
+          <div class="col-1"><p style="text-align:right;"><small><br>Prefer Black</small></p></div>
+          <div class="col-3" style="text-align:center;">
+            <div id="slider-5" style="text-align:center;">
+            </div>
+          </div>
+          <div class="col-1"><p><small><br>Prefer White</small></p></div>
+          <div class="col"></div>
+        </div>
+
+        <div class="row"style="margin-bottom: 10px; ">
+          <div class="col"></div>
+          <div class="col-4">
+            <p>Surprised? Don't be!<br><br></p>
+              <h2 style="color:#61ff00;" align="center"> <strong> Not all biases are conscious.</strong></h2><br><br>
+              The slider below shows what the <strong>average</strong> you also thought their actual bias was. This measurement of bias, also known as "known" bias is the bias we consciously exhibit. It reflects our ideologies but it usually does not reflect the unconscious biases, also known as your "implicit" bias. The Harvard IAT test measures the implicit bias. <br>
+            </p>
+          </div>
+          <div class="col">
+          </div>
+        </div>
+<!-- //slider6 -->
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-1"><p style="text-align:right;"><small><br>Prefer Black</small></p></div>
+          <div class="col-3" style="text-align:center;">
+            <div id="slider-6" style="text-align:center;">
+            </div>
+          </div>
+          <div class="col-1"><p><small><br>Prefer White</small></p></div>
+          <div class="col"></div>
+        </div>
+
+        <div class="row"style="margin-bottom: 10px; ">
+          <div class="col"></div>
+          <div class="col-4">
+            <p>Beyond that however, it is true that you may not be the same as the <strong>average</strong> of the group you belong to. In fact,<br><br></p>
+              <h2 style="color:#61ff00;" align="center"> <strong> You are <u>not</u> the average you.</strong></h2><br><br>
+              And neither is anyone else. Although bias is human, and humans tend to categorize, we should be mindful of this trait and realize that when it comes to complex concepts such as bias, considering people as the <strong>average</strong> them can be very destructive. <br>
+              While demographics can uncover trends in complex concepts such as bias, bias is usually the outcome of many external societal factors. Demographics can point at some of these external factors but do not define them.
+              <br><br><br>
+                <h2 style="color:#61ff00;" align="center"> <strong> Your biases are not (just) yours.</strong></h2><br><br>
+              They are the byproduct of the media you consume, the people and rolemodels you see around you, discrimination you have personally experienced, and many many other factors.
+              <br>
+              Finally! You can explore both explicit and implicit bias in the US based on county. We hope you keep in mind that <br><br>
+              <ol>
+              <li>Bias is human.</li>
+              <li>Not all biases are conscious.</li>
+              <li>Most people are not the same as the average of their demographic group.</li>
+              <li>Biases are the outcome of many external factors beyond demographics.</li>
+              <br><br>
+              <h3 style="color:#61ff00;" align="center"> <strong>Let's explore bias to <u>reduce</u> our existing biases instead of making them stronger. </strong></h3><br><br>
+            </ol>
+            </p>
+          </div>
+          <div class="col">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-7">
+            <h3>IMPLICIT BIAS BY COUNTY</h3>
+            <h5 class="text-muted">Average Implicit Bias (IAT) Score from 2002-2018</h5>
+            <!-- <img src="implicit.png" class="img-fluid"> -->
+            <svg class="bias" width="960" height="600"></svg>
+          </div>
+          <div class="col">
+            <div class="filter">
+                  <!-- <br><br><br><br><br><br><h6>Filters:</h6><br>
+                    <select id="Age" class="filterOption"></select>
+                    <span>year old</span>
+                    <select id="Gender" class="filterOption"></select>
+                    <span>people who identify as</span>
+                    <select id="Sexual_Identity" class="filterOption"></select>
+                    <span>with a total family income of</span>
+                    <select id="Total_Family_Income" class="filterOption"></select>
+                    </span>.</span> -->
+            </div>
+          </div>
+        </div>
+
+
+
+    <svg><circle id="testCircle" cx="90" cy="30" r="8" style="fill: none"></circle></svg>
+    <svg><circle id="testCircle2" cx="90" cy="30" r="8" style="fill: none"></circle></svg>
+    <svg><circle id="testCircle3" cx="90" cy="30" r="8" style="fill: none"></circle></svg>
+
+
+
+    <!-- Optional JavaScript -->
+    <!-- <script type="text/javascript" src="dcmap.js"></script> -->
+    <!-- <script type="text/javascript" src="Chart.js"></script> -->
+    <script type="text/javascript" src="sliders.js"></script>
+    <!-- <script type="text/javascript" src="map.js"></script> -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
